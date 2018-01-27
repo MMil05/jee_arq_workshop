@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module xmlns="urn:jboss:module:1.1" name="com.mysql">
+	<resources>
+		<resource-root path="mysql-connector-java-5.1.45-bin.jar"/>
+	</resources>
+	<dependencies>
+		<module name="javax.api"/>
+		<module name="javax.transaction.api"/>
+	</dependencies>
+</module>
+
+
+
+
+<driver name="mysql" module="com.mysql">
+	<driver-class>com.mysql.jdbc.Driver</driver-class>
+</driver>
+
+
+
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+		 
+		 
+		 
+		 
+<security-domain>ISASecurityDomain</security-domain>
+
+
+
+<security-constraint>
+	<web-resource-collection>
+		<web-resource-name>HtmlAuth</web-resource-name>
+		<description>application security constraints
+		</description>
+		<url-pattern>/add-user.jsp</url-pattern>
+		<http-method>GET</http-method>
+		<http-method>POST</http-method>
+	</web-resource-collection>
+	<auth-constraint>
+		<role-name>admin</role-name>
+	</auth-constraint>
+</security-constraint>
+<login-config>
+	<auth-method>FORM</auth-method>
+	<form-login-config>
+		<form-login-page>/login.jsp</form-login-page>
+		<form-error-page>/index.jsp</form-error-page>
+	</form-login-config>
+</login-config>
+<security-role>
+	<role-name>admin</role-name>
+</security-role>
+
+
+dsJndiName=java:/ISAJeeAuth
+principalsQuery=select password from users where login=?
+rolesQuery=select user_role, 'Roles' from roles where user_login=?
+hashAlgorithm=MD5
+hashEncoding=hex
+
+
+CREATE DATABASE  IF NOT EXISTS `isa-jee-auth`;
+USE `isa-jee-auth`;
+DROP TABLE IF EXISTS `users`;
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `login` varchar(64) NOT NULL,
+  `password` varchar(64) DEFAULT NULL,
+  `name` varchar(45) DEFAULT NULL,
+  `surname` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_login` varchar(64) DEFAULT NULL,
+  `user_role` varchar(64) DEFAULT NULL,
+  `role_group` varchar(64) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+INSERT INTO `users` VALUES (1,'adminUser','0192023a7bbd73250516f069df18b500',NULL,NULL); // admin123
+INSERT INTO `roles` VALUES (1,'adminUser','admin','admin');

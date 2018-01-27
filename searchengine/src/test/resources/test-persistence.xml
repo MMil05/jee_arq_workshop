@@ -1,0 +1,12 @@
+<persistence>
+    <persistence-unit name="pUnit">
+        <jta-data-source>java:jboss/datasources/ExampleDS</jta-data-source>
+
+        <properties>
+            <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
+            <property name="hibernate.archive.autodetection" value="class"/>
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+        </properties>
+    </persistence-unit>
+</persistence>

@@ -1,0 +1,14 @@
+version: "2.0"
+
+services:
+  database:
+    image: mysql:8.0.3
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: isa
+      MYSQL_USER: isa_user
+      MYSQL_PASSWORD: admin
+    volumes:
+      - ./sql-dumps/:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306

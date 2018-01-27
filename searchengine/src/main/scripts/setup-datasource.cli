@@ -1,0 +1,62 @@
+connect
+
+if (outcome != success) of /core-service=module-loading/:module-info(name=mysql)
+    echo install mysql driver
+    module add --name=mysql \
+        --resources=${settings.localRepository}/mysql/mysql-connector-java/${mysql.version}/mysql-connector-java-${mysql.version}.jar \
+        --dependencies=javax.api,javax.transaction.api
+    /subsystem=datasources/jdbc-driver=mysql: \
+        add( \
+            driver-name="mysql", \
+            driver-module-name="mysql")
+else
+    echo mysql driver already installed
+end-if
+
+if (outcome != success) of /subsystem=datasources/data-source=mysql:read-resource
+    echo add mysql datasource
+    /subsystem=datasources/data-source=mysql: \
+        add( \
+         jndi-name="${database.jndi}", \
+         driver-name=mysql, \
+         connection-url="${database.connection}", \
+         user-name="${database.user}", \
+         password="${database.password}")
+
+    /subsystem=ee/service=default-bindings:write-attribute(name="datasource", value="${database.jndi}")
+else
+    echo mysql datasource already present
+end-if
+
+if (outcome != success) of /subsystem=datasources/data-source=ISAJeeAuth:read-resource
+    echo add ISAJeeAuth datasource
+    /subsystem=datasources/data-source=ISAJeeAuth: \
+        add( \
+         jndi-name="${auth-datasource.jndi}", \
+         driver-name=mysql, \
+         connection-url="${auth-datasource.connection}", \
+         user-name="${auth-datasource.user}", \
+         password="${auth-datasource.password}")
+else
+    echo ISAJeeAuth datasource already present
+end-if
+
+if (outcome != success) of /subsystem=security/security-domain=ISASecurityDomain:read-resource
+    echo adding security domain
+    /subsystem=security/security-domain=ISASecurityDomain:add(cache-type=default)
+    /subsystem=security/security-domain=ISASecurityDomain/authentication=classic:add
+    /subsystem=security/security-domain=ISASecurityDomain/authentication=classic/login-module=Database:add( \
+        code=Database, \
+        flag=required, \
+        module-options={ \
+            dsJndiName=${auth-datasource.jndi}, \
+            principalsQuery="select password from users where login=?", \
+            rolesQuery="select user_role, 'Roles' from roles where user_login=?", \
+            hashAlgorithm=MD5, \
+            hashEncoding=hex \
+        } \
+    )
+    reload
+else
+    echo security domain already set up
+end-if
